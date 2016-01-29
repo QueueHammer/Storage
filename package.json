@@ -1,0 +1,16 @@
+{
+  "name": "storage",
+  "version": "1.0.0",
+  "description": "A utillity to access the local/session storage in the browser",
+  "main": "storage.js",
+  "scripts": {
+    "build": "browserify ./src/index.js -s Storage | uglifyjs -o storage.js"
+  },
+  "author": "Christopher Smith",
+  "license": "OML",
+  "devDependencies": {
+    "browserify": "13.0.0",
+    "uglify-js": "2.6.1",
+    "underscore": "1.8.3"
+  }
+}
