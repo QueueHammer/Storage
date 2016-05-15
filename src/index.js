@@ -1,53 +1,66 @@
-/* global module, window, require */
-var _ = require('underscore');
+var _ = require('lodash');
 
-function WrappedStorage(backing, key, data, serializer) {
-  
-}
+  if(!_.isString(config) && !_.isObject(config)) return null;
 
-function Storage(type, key, serialization) {
-  var backing = window[type + 'Storage'];
-  
-  if(!backing) throw {
-    message: 'The storage type provided is invalid',
-    name: 'InvalidStorageException'
-  };
-  
-  var rawData = backing.getItem(key);
-  
-  if(!rawData) throw {
-    message: 'There was no key in the specified store that matched the one provided',
-    name: 'InvalidKeyError'
-  };
-}
+  //Setup vars to be used in the new storage wrapper
+  var storages = [localStorage, sessionStorage];
 
-Storage.types = {
-  local: 'local',
-  session: 'session'
-};
+  /*
+  The data pipe works in one of two ways:
+  namespace string -> paths with storage source
+  object map -> paths with storage source
 
-_.each(Storage.types, function (key, value) {
-  var backing = window[key + 'Storage'];
-  var storageObject = _.reduce(_.keys(backing), function (m, d, i) {
-    //leave empty, and if null, load.
-    var data;
-    
-    Object.defineProperty(m, d, {
+  From there the pipe proceeds to create the storage object map:
+  paths with storage source -> storage backing wrapper -> object map
+  */
+
+  var out = _.chain(config)
+  .thru(function (cfg) {
+    //Validate if the input is one of two types
+    if(!_.isString(cfg) && !_.isObject(cfg)) return {};
+
+    //else return the parsed data based on the config
+    // IDEA: these function should be able to be re used to add
+    // new keys after they are bound though events on storage
+    // that would require there be a presistant reference for the storage
+    return _.isString(cfg) ?
+    require('./keysFromNamespace')(cfg, storages):
+    require('./keysFromObjectMap')(cfg, Storage);
+  })
+  .reduce(function (objMap, storageTarget, key) {
+    var localValue = null;
+
+    return Object.defineProperty(objMap, key, {
       get: function () {
-        if(data) return data;
-        
-        data = JSON.parse(backing.getItem(d));
-        return data;
+        if(localValue === null) {
+          localValue = JSON.parse(storageTarget.getKey(key));
+        }
+
+        return localValue;
+      },
+      set: function (val) {
+        var jsonVal = JSON.stringify(val);
+        JSON.parse(storageTarget.setKey(key, jsonVal));
+        localValue = JSON.parse(jsonVal);
       }
     });
-    
-    return m;
-  }, { });
-  
-  Object.defineProperty(Storage, key, {
-    value: storageObject
-  });
-});
+  }, {})
+  .reduce(function (objMap, val, key, source) {
+    _.reduce(key.split('.'), function (m, d, i, l) {
+      if(i + 1 !== l.length) {
+        Object.defineProperty(m, d, {
+          get: function () { return source[key]; },
+          set: function (x) { source[key] = x; }
+        });
+        return;
+      }
 
+      if(m[d] === undefined) { m[d] = {}; }
+      return m[d];
+    }, objMap);
+  }, {})
+  .value();
+  return out;
+}
 
-module.expots = Storage;
+module.exports = X;
