@@ -15,9 +15,7 @@ var testData = {
 
 function testNamespace(namespace) {
   console.log('testing:', namespace);
-  _.each(keysFromNamespace(namespace)(testData), function (x, y) {
-    console.log( y);
-  });
+  console.log(keysFromNamespace(namespace, [testData]));
 }
 
 testNamespace('a');

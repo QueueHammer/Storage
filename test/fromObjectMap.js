@@ -1,39 +1,36 @@
 var _ = require('lodash');
 var keysFromObjectMap = require('../src/keysFromObjectMap');
 
+function A() {}
+function B() {}
+
+B.prototype = new A();
+var b = new B();
+
 var testData = {
   a: {
-    b: true,
-    c: true,
+    b: b,
+    c: b,
     f: {
-      g: true,
-      h: true,
+      g: b,
+      h: b,
       i: {
-        j: {
-          k: true
-        }
+        j: { k: b }
       }
     }
   },
   b: {
     d: {
-      f: {
-        h: true
-      }
+      f: { h: b }
     },
     e: {
-      f: {
-        h: true
-      }
+      f: { h: b }
     }
   }
 };
 
 console.log('keysFromObjectMap test:');
 
-
-
 console.log('testing: obj');
-_.each(keysFromObjectMap(testData), function (x, y) {
-  console.log( y);
-});
+var result = keysFromObjectMap(testData, A);
+console.log(result);

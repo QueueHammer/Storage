@@ -1,5 +1,6 @@
 var _ = require('lodash');
 
+function X(config) {
   if(!_.isString(config) && !_.isObject(config)) return null;
 
   //Setup vars to be used in the new storage wrapper
@@ -28,30 +29,24 @@ var _ = require('lodash');
     require('./keysFromObjectMap')(cfg, Storage);
   })
   .reduce(function (objMap, storageTarget, key) {
-    var localValue = null;
-
-    return Object.defineProperty(objMap, key, {
-      get: function () {
-        if(localValue === null) {
-          localValue = JSON.parse(storageTarget.getKey(key));
-        }
-
-        return localValue;
-      },
-      set: function (val) {
-        var jsonVal = JSON.stringify(val);
-        JSON.parse(storageTarget.setKey(key, jsonVal));
-        localValue = JSON.parse(jsonVal);
-      }
-    });
-  }, {})
-  .reduce(function (objMap, val, key, source) {
     _.reduce(key.split('.'), function (m, d, i, l) {
       if(i + 1 !== l.length) {
-        Object.defineProperty(m, d, {
-          get: function () { return source[key]; },
-          set: function (x) { source[key] = x; }
-        });
+        (function() {
+          var localValue = null;
+          Object.defineProperty(m, d, {
+            get: function () {
+              if(localValue === null) {
+                localValue = JSON.parse(storageTarget.getKey(key));
+              }
+              return localValue;
+            },
+            set: function (x) {
+              var jsonVal = JSON.stringify(val);
+              JSON.parse(storageTarget.setKey(key, jsonVal));
+              localValue = JSON.parse(jsonVal);
+            }
+          });
+        }());
         return;
       }
 

@@ -10,7 +10,7 @@ function keysFromObjectMap(objectMap, parentStorage) {
     return _.reduce(obj, _.curry(parseKeys)(namespace ? namespace + '.' + key : key), outObj);
   }
 
-  return _.reduce(bindingTarget, _.curry(parseKeys)(null), {});
+  return _.reduce(objectMap, _.curry(parseKeys)(null), {});
 }
 
 module.exports = keysFromObjectMap;
