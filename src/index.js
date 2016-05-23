@@ -15,7 +15,12 @@ function X(config) {
   paths with storage source -> storage backing wrapper -> object map
   */
 
+  function log (x) {
+    console.log(x);
+  }
+
   var out = _.chain(config)
+  .tap(log)
   .thru(function (cfg) {
     //Validate if the input is one of two types
     if(!_.isString(cfg) && !_.isObject(cfg)) return {};
@@ -28,32 +33,38 @@ function X(config) {
     require('./keysFromNamespace')(cfg, storages):
     require('./keysFromObjectMap')(cfg, Storage);
   })
+  .tap(log)
   .reduce(function (objMap, storageTarget, key) {
     _.reduce(key.split('.'), function (m, d, i, l) {
-      if(i + 1 !== l.length) {
-        (function() {
-          var localValue = null;
-          Object.defineProperty(m, d, {
-            get: function () {
-              if(localValue === null) {
-                localValue = JSON.parse(storageTarget.getKey(key));
-              }
-              return localValue;
-            },
-            set: function (x) {
-              var jsonVal = JSON.stringify(val);
-              JSON.parse(storageTarget.setKey(key, jsonVal));
-              localValue = JSON.parse(jsonVal);
+      var localValue = null;
+
+      if(i + 1 === l.length) {
+        Object.defineProperty(m, d, {
+          get: function () {
+            console.log('in geter!');
+            if(localValue === null) {
+              localValue = JSON.parse(storageTarget.getItem(key));
             }
-          });
-        }());
-        return;
+            return localValue;
+          },
+          set: function (val) {
+            var jsonVal = JSON.stringify(val);
+            storageTarget.setItem(key, jsonVal);
+            localValue = JSON.parse(jsonVal);
+          }
+        });
+
+        return; //Hard return to exit loop
       }
 
       if(m[d] === undefined) { m[d] = {}; }
+
       return m[d];
     }, objMap);
+
+    return objMap;
   }, {})
+  .tap(log)
   .value();
   return out;
 }
