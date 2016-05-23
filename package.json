@@ -1,10 +1,10 @@
 {
   "name": "unified-storage",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A utillity to access the local/session storage in the browser",
   "main": "./src/index.js",
   "scripts": {
-    "test":"browserify ./test/index.js -o ./test/test.js -d && http-server ./test/",
+    "test": "browserify ./test/index.js -o ./test/test.js -d && http-server ./test/",
     "hint": "jshint ./src/*.js",
     "uglify": "uglifyjs ./build/storage/.js -o ./build/storage.min.js",
     "build": "browserify ./src/index.js -s StorageWrapper -o ./build/storage.js"
