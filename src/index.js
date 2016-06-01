@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-function X(config) {
+function UnivesalStorage(config) {
   if(!_.isString(config) && !_.isObject(config)) return null;
 
   //Setup vars to be used in the new storage wrapper
@@ -15,12 +15,7 @@ function X(config) {
   paths with storage source -> storage backing wrapper -> object map
   */
 
-  function log (x) {
-    console.log(x);
-  }
-
   var out = _.chain(config)
-  .tap(log)
   .thru(function (cfg) {
     //Validate if the input is one of two types
     if(!_.isString(cfg) && !_.isObject(cfg)) return {};
@@ -33,7 +28,6 @@ function X(config) {
     require('./keysFromNamespace')(cfg, storages):
     require('./keysFromObjectMap')(cfg, Storage);
   })
-  .tap(log)
   .reduce(function (objMap, storageTarget, key) {
     _.reduce(key.split('.'), function (m, d, i, l) {
       var localValue = null;
@@ -41,7 +35,6 @@ function X(config) {
       if(i + 1 === l.length) {
         Object.defineProperty(m, d, {
           get: function () {
-            console.log('in geter!');
             if(localValue === null) {
               localValue = JSON.parse(storageTarget.getItem(key));
             }
@@ -64,9 +57,9 @@ function X(config) {
 
     return objMap;
   }, {})
-  .tap(log)
   .value();
+
   return out;
 }
 
-module.exports = X;
+module.exports = UnivesalStorage;
