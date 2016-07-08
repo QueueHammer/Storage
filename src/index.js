@@ -1,7 +1,9 @@
 var _ = require('lodash');
 
-function UnivesalStorage(config) {
-  if(!_.isString(config) && !_.isObject(config)) return null;
+function UnivesalStorage(template, config) {
+  if(!_.isString(template) && !_.isObject(template)) return null;
+
+  var noCache = !!config.noCache;
 
   //Setup vars to be used in the new storage wrapper
   var storages = [localStorage, sessionStorage];
@@ -15,7 +17,7 @@ function UnivesalStorage(config) {
   paths with storage source -> storage backing wrapper -> object map
   */
 
-  var out = _.chain(config)
+  var out = _.chain(template)
   .thru(function (cfg) {
     //Validate if the input is one of two types
     if(!_.isString(cfg) && !_.isObject(cfg)) return {};
@@ -35,7 +37,7 @@ function UnivesalStorage(config) {
       if(i + 1 === l.length) {
         Object.defineProperty(m, d, {
           get: function () {
-            if(localValue === null) {
+            if(localValue === null || noCache) {
               localValue = JSON.parse(storageTarget.getItem(key));
             }
             return localValue;
