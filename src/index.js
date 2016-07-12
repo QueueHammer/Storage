@@ -3,7 +3,7 @@ var _ = require('lodash');
 function UnivesalStorage(template, config) {
   if(!_.isString(template) && !_.isObject(template)) return null;
 
-  var noCache = !!config.noCache;
+  var noCache = !!(config || {}).noCache;
 
   //Setup vars to be used in the new storage wrapper
   var storages = [localStorage, sessionStorage];
@@ -46,7 +46,8 @@ function UnivesalStorage(template, config) {
             var jsonVal = JSON.stringify(val);
             storageTarget.setItem(key, jsonVal);
             localValue = JSON.parse(jsonVal);
-          }
+          },
+          enumerable: true
         });
 
         return; //Hard return to exit loop
