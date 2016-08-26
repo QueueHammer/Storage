@@ -10,7 +10,7 @@
     "build": "browserify ./src/index.js -s StorageWrapper -o ./build/storage.js"
   },
   "author": "Christopher Smith",
-  "license": "OML",
+  "license": "MIT",
   "devDependencies": {
     "browserify": "13.0.0",
     "http-server": "0.9.0",
